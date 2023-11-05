@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  express:
+    build: .
+    container_name: express_app
+    env_file:
+      - ./.env
+    networks:
+      - express_network
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    depends_on:
+      - mongo
+    
+  mongo:
+    image: mongo
+    container_name: mongo_db
+    env_file:
+      - ./.env
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - express_network
+
+networks:
+  express_network:
+
+volumes:
+  mongodb:
