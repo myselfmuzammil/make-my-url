@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express';
 import { Types } from 'mongoose';
 
 import { Url } from '../models';
@@ -41,7 +41,7 @@ export const createUrl = catchAsyncErrorHandler(
 
 export const redirectToOriginalUrl = catchAsyncErrorHandler(
     async (req: Request<{id: Types.ObjectId}>, res: Response, next: NextFunction) => {
-        const shortUrlId = req.params.id
+        const shortUrlId = req.params.id;
 
         const url = await Url.findById(shortUrlId);
 

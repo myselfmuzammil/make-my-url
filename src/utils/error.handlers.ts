@@ -9,11 +9,11 @@ export class ErrorHandler extends Error {
         super(message);
 
         this.statusCode = statusCode;
-    }
+    }                                                                                                                                                                 
 }
 
 export function catchAsyncErrorHandler(asyncController: Function) {
     return (req: Request, res: Response, next: NextFunction): void => {
-        Promise.resolve(asyncController(req, res, next)).catch(next);
+        Promise.resolve(asyncController(req, res, next)).catch((err)=> console.log(err));
     }
 }
