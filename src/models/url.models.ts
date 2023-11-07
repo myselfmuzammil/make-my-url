@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-import { IUrl } from "../../types"
+import { IUrl } from "../../types";
 
 const urlSchema = new mongoose.Schema<IUrl>(
     {

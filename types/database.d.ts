@@ -1,12 +1,12 @@
-import { Types } from "mongoose";
+import { Types, Document } from "mongoose";
 
-export interface IUrl {
+export interface IUrl extends Document {
     urlTitle: string;
     redirectedUrl: string;
     createdAt: Date;
     updatedAt: Date
 }
-export interface IUser {
+export interface IUser extends Document {
     name: string;
     email: string;
     urls?: Types.ObjectId[];

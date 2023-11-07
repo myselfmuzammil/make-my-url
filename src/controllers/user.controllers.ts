@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+import jwt, { Secret } from 'jsonwebtoken'
 
 import { User } from "../models";
 import { ErrorHandler, catchAsyncErrorHandler } from "../utils";
@@ -45,7 +45,9 @@ export const loginController = catchAsyncErrorHandler(
             }
         ));
 
-        const user = await User.findOne({ email }).select('+password -email');
+        const user = await User.findOne({ email }).select(
+            '+password -email'
+        );
 
         if(!user) return next(new ErrorHandler(
             {
@@ -55,8 +57,7 @@ export const loginController = catchAsyncErrorHandler(
         ));
 
         const isPassword = await bcrypt.compare(
-            password,
-            user.password
+            password, user.password
         );
 
         if(!isPassword) return next(new ErrorHandler(
@@ -66,13 +67,12 @@ export const loginController = catchAsyncErrorHandler(
             }
         ));
 
-        const userToken = jwt.sign(
+        const userToken = await jwt.sign(
             {
                 _id: user._id,
-                name: user.name,
-                email: email,
+                name: user.name, email: email,
             },
-            process.env.JWT_SECRET!,
+                process.env.JWT_SECRET as Secret,
             {
                 expiresIn: "90d" 
             }
@@ -81,8 +81,7 @@ export const loginController = catchAsyncErrorHandler(
         return res.status(200).cookie("jwt_token", userToken).json(
             {
                 _id: user._id,
-                name: user.name,
-                email: email
+                name: user.name, email: email
             }
         );
     }
