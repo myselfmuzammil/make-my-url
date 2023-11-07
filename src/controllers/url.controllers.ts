@@ -6,7 +6,7 @@ import { urlShortService } from '../services';
 import { ErrorHandler, catchAsyncErrorHandler } from '../utils';
 import { IReqBody, IResBody } from '../../types';
 
-export const createUrl = catchAsyncErrorHandler(
+export const postController = catchAsyncErrorHandler(
     async (req: Request<never, never, IReqBody>, res: Response<IResBody>, next: NextFunction) => {
         const { urlTitle, redirectedUrl } = req.body;
         
@@ -27,7 +27,7 @@ export const createUrl = catchAsyncErrorHandler(
 
         const shortUrl = urlShortService(url._id);
 
-        return res.status(200).json(
+        return res.status(201).json(
             {
                 urlTitle: urlTitle,
                 redirectedUrl: redirectedUrl,
@@ -39,7 +39,7 @@ export const createUrl = catchAsyncErrorHandler(
     }
 );
 
-export const redirectToOriginalUrl = catchAsyncErrorHandler(
+export const getController = catchAsyncErrorHandler(
     async (req: Request<{id: Types.ObjectId}>, res: Response, next: NextFunction) => {
         const shortUrlId = req.params.id;
 

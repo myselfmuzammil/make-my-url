@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 
-import { redirectToOriginalUrl, createUrl } from "../controllers";
+import { postController, getController } from "../controllers";
 
 export const urlRoute: Router = express.Router().
-post('/', createUrl).
-get('/:id', redirectToOriginalUrl);
+post('/', postController).
+get('/:id', getController);
