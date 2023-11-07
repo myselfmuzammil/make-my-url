@@ -14,6 +14,6 @@ export class ErrorHandler extends Error {
 
 export function catchAsyncErrorHandler(asyncController: Function) {
     return (req: Request, res: Response, next: NextFunction): void => {
-        Promise.resolve(asyncController(req, res, next)).catch((err)=> console.log(err));
+        Promise.resolve(asyncController(req, res, next)).catch(next);
     }
 }

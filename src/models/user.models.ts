@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 import { IUser } from "../../types";
+import { beforeSaveUser } from "../middlewares";
 
 export const userSchema = new mongoose.Schema<IUser>(
     {
@@ -32,5 +33,7 @@ export const userSchema = new mongoose.Schema<IUser>(
         }
     }
 );
+
+beforeSaveUser(userSchema);
 
 export const User = mongoose.model<IUser>("User", userSchema);
