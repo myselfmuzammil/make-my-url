@@ -9,6 +9,6 @@ export interface IUrl {
 export interface IUser {
     name: string;
     email: string;
-    urls: Types.ObjectId[];
+    urls?: Types.ObjectId[];
     password: string;
 }

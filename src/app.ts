@@ -1,22 +1,21 @@
 import express, { Express } from "express";
-import bodyParser from 'body-parser';
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
 
 import { urlRoute } from "./routes";
 import { errorMiddleware } from "./middlewares";
 
-const app: Express = express();
-const PORT = Number(process.env.PORT) || 8080;
+export const app: Express = express();
 
-export function main() { 
-    app.use(
-        bodyParser.json(),
-        bodyParser.urlencoded({ extended: true })
-    );
-    
-    app.use(urlRoute);
-    app.use(errorMiddleware);
-    
-    return app.listen(PORT, () => {
-        console.log(`Server listening on Port no ${PORT} 🙌`);
-    });
-}    
+app.use(cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"))
+app.use(cookieParser());
+
+app.use(urlRoute);
+app.use(errorMiddleware);

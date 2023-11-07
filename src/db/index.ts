@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 import { DB_NAME } from '../constants.js';
 
-export async function connectDb() {
+export async function connectDB() {
     for (let i = 0; i < 3; ++i) {
         try {
             const connectionInstance = await mongoose.connect(
