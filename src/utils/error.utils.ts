@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
-import { IError } from '../../types';
+export interface IError {
+    message: string,
+    statusCode: number
+}
 
 export class ErrorHandler extends Error {
     statusCode: number;

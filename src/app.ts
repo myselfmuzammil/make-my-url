@@ -1,8 +1,8 @@
 import express, { Express } from "express";
-import cors from 'cors'
-import cookieParser from 'cookie-parser'
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
-import { urlRoute, userRoute } from "./routes";
+import { appRouter } from "./routes";
 import { errorMiddleware } from "./middlewares";
 
 export const app: Express = express();
@@ -14,9 +14,8 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"))
+app.use(express.static("public"));
 app.use(cookieParser());
 
-app.use(urlRoute);
-app.use(userRoute);
+app.use("/api/v1", appRouter);
 app.use(errorMiddleware);

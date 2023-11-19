@@ -1,31 +1,23 @@
 import { NextFunction, Request, Response } from 'express';
-import { Types } from 'mongoose';
+import { Schema } from 'mongoose';
 
 import { Url } from '../models';
-import { urlShortService } from '../services';
 import { ErrorHandler, catchAsyncErrorHandler } from '../utils';
-import { IReqBody, IResBody } from '../../types';
+import { CreateUrlSchema } from '../schema';
 
 export const postController = catchAsyncErrorHandler(
-    async (req: Request<never, never, IReqBody>, res: Response<IResBody>, next: NextFunction) => {
+    async (req: Request<{}, {}, CreateUrlSchema> & {user:{_id:Schema.Types.ObjectId}}, res: Response) => {
         const { urlTitle, redirectedUrl } = req.body;
-        
-        if(!redirectedUrl) return next(new ErrorHandler(
-            {
-                message: "fields are required",
-                statusCode: 400,
-            }
-        ));
 
         const url = await Url.create(
             {
                 urlTitle: urlTitle,
                 redirectedUrl: redirectedUrl,
-                
+                createdBy: req.user._id
             }
         );
 
-        const shortUrl = urlShortService(url._id);
+        const shortUrl = url.generateURL()
 
         return res.status(201).json(
             {
@@ -40,10 +32,12 @@ export const postController = catchAsyncErrorHandler(
 );
 
 export const getController = catchAsyncErrorHandler(
-    async (req: Request<{id: Types.ObjectId}>, res: Response, next: NextFunction) => {
+    async (req: Request<{id: Schema.Types.ObjectId}>, res: Response, next: NextFunction) => {
         const shortUrlId = req.params.id;
 
-        const url = await Url.findById(shortUrlId);
+        const url = await Url.findByIdAndUpdate(
+            shortUrlId, {$inc: {visits: 1}}
+        );
 
         if(!url) return next(new ErrorHandler(
             {
@@ -52,6 +46,6 @@ export const getController = catchAsyncErrorHandler(
             }
         ));
 
-        return res.status(200).redirect(url.redirectedUrl);
+        return res.status(303).redirect(url.redirectedUrl);
     }
 );

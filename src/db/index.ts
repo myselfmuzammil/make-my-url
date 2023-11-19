@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 import { DB_NAME } from '../constants.js';
+import { log } from '../utils';
 
 export async function connectDB() {
     for (let i = 0; i < 3; ++i) {
@@ -8,14 +9,14 @@ export async function connectDB() {
             const connectionInstance = await mongoose.connect(
                 `${process.env.MONGO_URI}/${DB_NAME}`
             );
-            console.log(`MongoDB connected 🤝 DB HOST ${
+            log.info(`MongoDB connected 🤝 DB HOST ${
                 connectionInstance.connection.host
             }`);
             break;
         } catch (err) {
-            console.log(`MongoDB connection Failed 💔 ${i}`);
+            log.error(`MongoDB connection Failed 💔 ${i}`);
             if (i >= 2) {
-                throw err;
+                process.exit(1)
             }
         }
     }
