@@ -1,32 +1,31 @@
 version: "3.8"
 
 services:
-  express:
-    build: .
-    container_name: express_app
+  short-url-backend-service:
+    image: short-url-backend
+    container_name: short-url-backend-container
     env_file:
       - ./.env
     networks:
-      - express_network
+      - short-url-network
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
     depends_on:
-      - mongo
-    
-  mongo:
+      - mongo-service
+
+  mongo-service:
     image: mongo
-    container_name: mongo_db
-    env_file:
-      - ./.env
+    container_name: mongo-container
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
     volumes:
       - mongodb:/data/db
     networks:
-      - express_network
+      - short-url-network
 
 networks:
-  express_network:
+  short-url-network:
 
 volumes:
   mongodb:

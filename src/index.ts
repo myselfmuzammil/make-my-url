@@ -1,13 +1,10 @@
-import { app } from './app.js';
-import { connectDB } from "./db";
-import { log } from './utils'
+import {app} from "./app";
+import {connectDB} from "./db";
 
-;(
-    async () => {
-        await connectDB();
+(async () => {
+  await connectDB();
 
-        app.listen(process.env.PORT, () => {
-            log.info(`Server listening at Port: ${process.env.PORT} 🙌`);
-        });
-    }
-)();
+  app.listen(process.env.PORT, () => {
+    console.log(`Server listening at Port: ${process.env.PORT} 🙌`);
+  });
+})();

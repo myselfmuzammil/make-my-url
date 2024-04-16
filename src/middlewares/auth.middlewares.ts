@@ -1,23 +1,31 @@
-import { Request, Response, NextFunction } from "express";
-import jwt, { Secret } from 'jsonwebtoken';
-import _ from 'lodash';
+import {Request, Response, NextFunction} from "express";
+import jwt, {Secret} from "jsonwebtoken";
+import _ from "lodash";
 
-import { ErrorHandler } from "../utils";
+import {ErrorHandler} from "../utils";
 
-export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-    try {
-        const user = jwt.verify(
-            req.cookies.access_token,
-            process.env.ACCESS_TOKEN_SECRET as Secret
-        );
+export function verifyJWT(req: Request, res: Response, next: NextFunction) {
+  const token = req.header("authorization")?.replace("Bearer ", "");
 
-        return _.assign(req, { user }), next();
-    } catch (error) {
-        return next(new ErrorHandler(
-            {
-                message: "Unauthorized token",
-                statusCode: 401
-            }
-        ));
-    }
+  if (!token) {
+    return next(
+      new ErrorHandler({
+        message: "Unauthorized request",
+        statusCode: 401,
+      })
+    );
+  }
+
+  try {
+    const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as Secret);
+
+    return _.assign(req, user), next();
+  } catch (error) {
+    next(
+      new ErrorHandler({
+        message: "Invalid token",
+        statusCode: 401,
+      })
+    );
+  }
 }

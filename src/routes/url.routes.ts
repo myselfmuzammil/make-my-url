@@ -1,33 +1,40 @@
-import express, { Express, Router } from 'express';
-import z from 'zod';
+import express, {Express, Router} from "express";
+import z from "zod";
 
-import { postController, getController } from "../controllers";
-import { authMiddleware, validateSchema } from '../middlewares';
-import { createUrlSchema } from '../schema';
+import {
+  createURLController,
+  getURLByIdAndRedirectController,
+} from "../controllers";
+import {verifyJWT, validateSchema} from "../middlewares";
+import {createUrlSchema} from "../schema";
 
 const router: Router = express.Router();
-export const urlRoute: Express = express();
+const urlRoute: Express = express();
 
 router.post(
-    "/create",
-    authMiddleware,
-    validateSchema({
-        body: createUrlSchema
-    }),
-    postController
+  "/create",
+  verifyJWT,
+  validateSchema({
+    body: createUrlSchema,
+  }),
+  createURLController
 );
 
 router.get(
-    "/redirect/:id",
-    validateSchema({
-        params: z.object({
-            id: z.string({
-                required_error: "Id is required",
-                invalid_type_error: "Id must be a string"
-            }).regex(/^[0-9a-fA-F]{24}$/, "Invalid _id")
+  "/redirect/:id",
+  validateSchema({
+    params: z.object({
+      id: z
+        .string({
+          required_error: "Id is required",
+          invalid_type_error: "Id must be a string",
         })
+        .regex(/^[0-9a-fA-F]{24}$/, "Invalid _id"),
     }),
-    getController
+  }),
+  getURLByIdAndRedirectController
 );
 
 urlRoute.use("/url", router);
+
+export default urlRoute;

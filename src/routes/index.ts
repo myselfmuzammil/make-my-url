@@ -1,11 +1,10 @@
-import express, { Express } from 'express'
+import {Router} from "express";
 
-import { urlRoute } from "./url.routes.js";
-import { userRoute } from "./user.routes.js";
+import urlRoute from "./url.routes";
+import userRoute from "./user.routes";
 
-export const appRouter: Express = express();
+const appRouter = Router();
 
-appRouter.use(
-    userRoute,
-    urlRoute,
-);
+appRouter.use(userRoute, urlRoute);
+
+export default appRouter;

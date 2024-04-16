@@ -1,34 +1,65 @@
-import { User } from "../models";
-import { ErrorHandler } from "../utils";
-import { LoginSchema, SignupSchema } from "../schema";
+import jwt, {Secret} from "jsonwebtoken";
 
-export async function loginService({ email, password }: LoginSchema) {
-    const user = await User
-    .findOne({ email }).select("+password");
+import {UserModel} from "../models";
+import {ErrorHandler} from "../utils";
+import {LoginSchema, SignupSchema} from "../schema";
 
-    if(
-        !(user &&
-        await user.isPasswordCorrect(password))
-    ) throw new ErrorHandler(
-        {
-            message: "Invalid email or password",
-            statusCode: 401,
-        }
-    );
+export async function loginService({email, password}: LoginSchema) {
+  const user = await UserModel.findOne({email}).select("+password");
 
-    return user;
+  if (!(user && (await user.isPasswordCorrect(password)))) {
+    throw new ErrorHandler({
+      statusCode: 401,
+      message: "Invalid user credentials",
+    });
+  }
+
+  const accessToken = user.generateAccessToken();
+  const refreshToken = user.generateRefreshToken();
+
+  user.refreshToken = refreshToken;
+
+  await user.save();
+
+  return {accessToken, refreshToken};
 }
 
-export async function signupService(body: SignupSchema) {
-    try {
-        const user = await User.create(body);
-        return user;
-    } catch (error) {
-        throw new ErrorHandler(
-            {
-                message: "Email is already registered",
-                statusCode: 409,
-            }
-        );
-    }
+export async function signupService({email, name, password}: SignupSchema) {
+  if (!(await UserModel.findOne({email}))) {
+    return UserModel.create({
+      email,
+      name,
+      password,
+    });
+  } else {
+    throw new ErrorHandler({
+      statusCode: 409,
+      message: "Email is already registered",
+    });
+  }
+}
+
+export async function regenerateAccessAndRefreshTokens(refreshToken: string) {
+  const {_id} = jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET as Secret
+  ) as {_id: string};
+
+  const user = await UserModel.findById(_id);
+
+  if (refreshToken !== user?.refreshToken) {
+    throw new ErrorHandler({
+      statusCode: 401,
+      message: "refresh token is expired or used",
+    });
+  }
+
+  const accessToken = user.generateAccessToken();
+  const newRefreshToken = user.generateRefreshToken();
+
+  user.refreshToken = newRefreshToken;
+
+  await user.save();
+
+  return {accessToken, newRefreshToken};
 }

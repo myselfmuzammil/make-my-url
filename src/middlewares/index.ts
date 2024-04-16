@@ -1,3 +1,3 @@
-export * from "./error.middlewares.js";
-export * from "./auth.middlewares.js";
-export * from "./validate.middlewares.js";
+export * from "./error.middlewares";
+export * from "./auth.middlewares";
+export * from "./validate.middlewares";

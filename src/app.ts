@@ -1,21 +1,28 @@
-import express, { Express } from "express";
-import cors from 'cors';
-import cookieParser from 'cookie-parser';
+import express, {Express} from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
-import { appRouter } from "./routes";
-import { errorMiddleware } from "./middlewares";
+import appRouter from "./routes";
+import {globalErrorHandler} from "./middlewares";
 
 export const app: Express = express();
 
-app.use(cors({
+app.use(
+  cors({
     origin: process.env.CORS_ORIGIN,
-    credentials: true
-}));
+    credentials: true,
+  })
+);
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({extended: true}));
 app.use(express.static("public"));
 app.use(cookieParser());
 
 app.use("/api/v1", appRouter);
-app.use(errorMiddleware);
+
+app.all("/health", (req, res) => {
+  res.sendStatus(200);
+});
+
+app.use(globalErrorHandler);

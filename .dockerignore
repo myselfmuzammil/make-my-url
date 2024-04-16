@@ -1,5 +1,12 @@
 node_modules/
+dist/
 
 Dockerfile
-
 docker-compose.yml
+
+.prettierrc
+.prettierignore
+.gitignore
+.env.example
+
+Readme.md

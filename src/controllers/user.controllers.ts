@@ -1,24 +1,40 @@
-import { Request, Response } from "express";
+import {Request, Response} from "express";
 
-import { catchAsyncErrorHandler } from "../utils";
-import { loginService, signupService } from "../services";
-import { SignupSchema, LoginSchema } from "../schema";
+import {catchAsyncErrorHandler} from "../utils";
+import {
+  loginService,
+  regenerateAccessAndRefreshTokens,
+  signupService,
+} from "../services";
+import type {SignupSchema, LoginSchema, RefreshTokenSchema} from "../schema";
 
-export const signupController = catchAsyncErrorHandler(
-    async (req: Request<{}, {}, SignupSchema>, res: Response) => {
-        await signupService(req.body);
+export const signupController = catchAsyncErrorHandler(async function (
+  req: Request<{}, {}, SignupSchema>,
+  res: Response
+) {
+  await signupService(req.body);
 
-        return res.status(201).json({ message: "SignUp successfully!" });
-    }
-);
+  return res.status(201).json({
+    success: true,
+    message: "SignUp successfully!",
+  });
+});
 
-export const loginController = catchAsyncErrorHandler(
-    async (req: Request<{}, {}, LoginSchema>, res: Response) => {
-        const user = await loginService(req.body);
+export const loginController = catchAsyncErrorHandler(async function (
+  req: Request<{}, {}, LoginSchema>,
+  res: Response
+) {
+  const tokens = await loginService(req.body);
 
-        const access_token = user.generateAccessToken();
-        const refresh_token = user.generateRefreshToken();
+  return res.json(tokens);
+});
 
-        return res.json({ access_token, refresh_token });
-    }
-);
+export const refreshTokenController = catchAsyncErrorHandler(async function (
+  req: Request<{}, {}, RefreshTokenSchema>,
+  res: Response
+) {
+  const {refreshToken} = req.body;
+  const tokens = await regenerateAccessAndRefreshTokens(refreshToken);
+
+  return res.json(tokens);
+});
