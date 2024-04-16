@@ -18,8 +18,4 @@ RUN npm install --omit=dev
 
 COPY --from=build dist .
 
-RUN ls
-
 CMD ["pm2", "index.js"]
-
-RUN echo "app is running"
