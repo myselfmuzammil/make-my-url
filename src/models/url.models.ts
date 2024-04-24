@@ -1,21 +1,9 @@
-import mongoose, {Document, Model, Schema} from "mongoose";
-
-export interface IUrl extends Document {
-  urlTitle: string;
-  redirectedUrl: string;
-  visits: number;
-  createdBy: Schema.Types.ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export interface UrlMethods {
-  generateURL(): string;
-}
+import mongoose, {Model, Schema} from "mongoose";
+import {UrlDocument, UrlMethods} from "../types";
 
 const urlSchema = new mongoose.Schema<
-  IUrl,
-  Model<IUrl, {}, UrlMethods>,
+  UrlDocument,
+  Model<UrlDocument, {}, UrlMethods>,
   UrlMethods
 >(
   {
@@ -45,13 +33,13 @@ const urlSchema = new mongoose.Schema<
 );
 
 urlSchema.methods.generateURL = function () {
-  const url = this as IUrl & UrlMethods;
+  const url = this as UrlDocument & UrlMethods;
 
   const {PROTOCOL, HOST_NAME, PORT} = process.env;
   return `${PROTOCOL}://${HOST_NAME}:${PORT}/api/v1/url/redirect/${url._id}`;
 };
 
-export const URLModel = mongoose.model<IUrl, Model<IUrl, {}, UrlMethods>>(
-  "Url",
-  urlSchema
-);
+export const URLModel = mongoose.model<
+  UrlDocument,
+  Model<UrlDocument, {}, UrlMethods>
+>("Url", urlSchema);

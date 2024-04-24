@@ -14,8 +14,10 @@ RUN npm install -g pm2
 
 COPY --from=build package*.json .
 
-RUN npm install --omit=dev 
+ENV NODE_ENV=production
+
+RUN npm install 
 
 COPY --from=build dist .
 
-CMD ["pm2", "index.js"]
+CMD ["pm2", "./dist/index.js"]

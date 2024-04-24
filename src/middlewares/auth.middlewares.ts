@@ -2,14 +2,14 @@ import {Request, Response, NextFunction} from "express";
 import jwt, {Secret} from "jsonwebtoken";
 import _ from "lodash";
 
-import {ErrorHandler} from "../utils";
+import {ApiError} from "../utils";
 
 export function verifyJWT(req: Request, res: Response, next: NextFunction) {
   const token = req.header("authorization")?.replace("Bearer ", "");
 
   if (!token) {
     return next(
-      new ErrorHandler({
+      new ApiError({
         message: "Unauthorized request",
         statusCode: 401,
       })
@@ -18,11 +18,10 @@ export function verifyJWT(req: Request, res: Response, next: NextFunction) {
 
   try {
     const user = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as Secret);
-
-    return _.assign(req, user), next();
+    return _.assign(req, {user: user}), next();
   } catch (error) {
     next(
-      new ErrorHandler({
+      new ApiError({
         message: "Invalid token",
         statusCode: 401,
       })

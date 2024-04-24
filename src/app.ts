@@ -2,10 +2,15 @@ import express, {Express} from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
+import {
+  zodErrorHandler,
+  apiErrorHandler,
+  jwtErrorHandler,
+  errorHandler,
+} from "./middlewares";
 import appRouter from "./routes";
-import {globalErrorHandler} from "./middlewares";
 
-export const app: Express = express();
+const app: Express = express();
 
 app.use(
   cors({
@@ -25,4 +30,9 @@ app.all("/health", (req, res) => {
   res.sendStatus(200);
 });
 
-app.use(globalErrorHandler);
+app.use(zodErrorHandler);
+app.use(apiErrorHandler);
+app.use(jwtErrorHandler);
+app.use(errorHandler);
+
+export default app;

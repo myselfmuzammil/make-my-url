@@ -1,17 +1,13 @@
 import {Request, Response} from "express";
-import {Schema} from "mongoose";
 
 import {catchAsyncErrorHandler} from "../utils";
-import {CreateUrlSchema} from "../schema";
 import {createURLService, findUrlByIdAndIncrement} from "../services";
-
-type User = {
-  user: {_id: Schema.Types.ObjectId};
-};
+import type {CreateUrlSchema} from "../schema";
+import type {JwtDecodedUser, UrlIdParam} from "../types";
 
 export const createURLController = catchAsyncErrorHandler(async function (
-  req: Request<{}, {}, CreateUrlSchema> & User,
-  res: Response & User
+  req: Request<{}, {}, CreateUrlSchema> & JwtDecodedUser,
+  res: Response
 ) {
   const URL = await createURLService({
     ...req.body,
@@ -22,8 +18,8 @@ export const createURLController = catchAsyncErrorHandler(async function (
 });
 
 export const getURLByIdAndRedirectController = catchAsyncErrorHandler(
-  async function (req: Request<{id: Schema.Types.ObjectId}>, res: Response) {
-    const URL = await findUrlByIdAndIncrement(req.params.id);
+  async function (req: Request<UrlIdParam>, res: Response) {
+    const URL = await findUrlByIdAndIncrement(req.params._id);
 
     return res.status(303).redirect(URL.redirectedUrl);
   }

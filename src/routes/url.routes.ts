@@ -21,10 +21,10 @@ router.post(
 );
 
 router.get(
-  "/redirect/:id",
+  "/redirect/:_id",
   validateSchema({
     params: z.object({
-      id: z
+      _id: z
         .string({
           required_error: "Id is required",
           invalid_type_error: "Id must be a string",

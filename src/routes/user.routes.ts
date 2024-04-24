@@ -4,8 +4,9 @@ import {
   signupController,
   loginController,
   refreshTokenController,
+  logoutUser,
 } from "../controllers";
-import {validateSchema} from "../middlewares";
+import {validateSchema, verifyJWT} from "../middlewares";
 import {loginSchema, refreshTokenSchema, signupSchema} from "../schema";
 
 const router: Router = express.Router();
@@ -26,6 +27,8 @@ router.post(
   }),
   loginController
 );
+
+router.patch("/logout", verifyJWT, logoutUser);
 
 router.post(
   "/refreshToken",

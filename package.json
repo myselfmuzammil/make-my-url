@@ -1,5 +1,5 @@
 {
-  "name": "express-app",
+  "name": "make-my-url",
   "scripts": {
     "build": "tsc -b",
     "start": "node --env-file .env \"./dist/index.js\"",
@@ -35,6 +35,6 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": "^20"
+    "node": "^18"
   }
 }

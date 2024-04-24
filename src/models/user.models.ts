@@ -1,25 +1,13 @@
-import mongoose, {Schema, Model, Document} from "mongoose";
+import mongoose, {Model} from "mongoose";
 import bcrypt from "bcrypt";
 import jwt, {Secret} from "jsonwebtoken";
 import _ from "lodash";
 
-export interface IUser extends Document {
-  name: string;
-  email: string;
-  urls?: Schema.Types.ObjectId[];
-  password: string;
-  refreshToken?: string;
-}
-
-export interface UserMethods {
-  isPasswordCorrect(password: string): Promise<boolean>;
-  generateAccessToken(): string;
-  generateRefreshToken(): string;
-}
+import type {UserDocument, UserMethods} from "../types";
 
 export const userSchema = new mongoose.Schema<
-  IUser,
-  Model<IUser, {}, UserMethods>,
+  UserDocument,
+  Model<UserDocument, {}, UserMethods>,
   UserMethods
 >({
   name: {
@@ -42,13 +30,10 @@ export const userSchema = new mongoose.Schema<
     select: false,
   },
 
-  urls: {
-    type: [Schema.Types.ObjectId],
-    ref: "Url",
+  refreshToken: {
+    type: String,
     select: false,
   },
-
-  refreshToken: String,
 });
 
 userSchema.pre("save", async function (next) {
@@ -64,24 +49,24 @@ userSchema.pre("save", async function (next) {
   return next();
 });
 
-userSchema.methods.isPasswordCorrect = async function (password: string) {
-  const user = this as IUser & UserMethods;
+userSchema.methods.isPasswordCorrect = async function (password) {
+  const user = this as UserDocument & UserMethods;
 
   return bcrypt.compare(password, user.password);
 };
 
 userSchema.methods.generateAccessToken = function () {
-  const user = this as IUser & UserMethods;
+  const user = this as UserDocument & UserMethods;
 
   return jwt.sign(
-    _.omit(user.toJSON(), "password"),
+    _.omit(user.toJSON(), ["password", "refreshToken"]),
     process.env.ACCESS_TOKEN_SECRET as Secret,
     {expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
   );
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  const user = this as IUser & UserMethods;
+  const user = this as UserDocument & UserMethods;
 
   return jwt.sign(
     _.pick(user.toJSON(), "_id"),
@@ -90,7 +75,7 @@ userSchema.methods.generateRefreshToken = function () {
   );
 };
 
-export const UserModel = mongoose.model<IUser, Model<IUser, {}, UserMethods>>(
-  "User",
-  userSchema
-);
+export const UserModel = mongoose.model<
+  UserDocument,
+  Model<UserDocument, {}, UserMethods>
+>("User", userSchema);

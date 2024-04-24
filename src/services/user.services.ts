@@ -1,14 +1,14 @@
 import jwt, {Secret} from "jsonwebtoken";
 
 import {UserModel} from "../models";
-import {ErrorHandler} from "../utils";
+import {ApiError} from "../utils";
 import {LoginSchema, SignupSchema} from "../schema";
 
 export async function loginService({email, password}: LoginSchema) {
   const user = await UserModel.findOne({email}).select("+password");
 
   if (!(user && (await user.isPasswordCorrect(password)))) {
-    throw new ErrorHandler({
+    throw new ApiError({
       statusCode: 401,
       message: "Invalid user credentials",
     });
@@ -32,7 +32,7 @@ export async function signupService({email, name, password}: SignupSchema) {
       password,
     });
   } else {
-    throw new ErrorHandler({
+    throw new ApiError({
       statusCode: 409,
       message: "Email is already registered",
     });
@@ -45,10 +45,10 @@ export async function regenerateAccessAndRefreshTokens(refreshToken: string) {
     process.env.REFRESH_TOKEN_SECRET as Secret
   ) as {_id: string};
 
-  const user = await UserModel.findById(_id);
+  const user = await UserModel.findById(_id).select("+refreshToken");
 
   if (refreshToken !== user?.refreshToken) {
-    throw new ErrorHandler({
+    throw new ApiError({
       statusCode: 401,
       message: "refresh token is expired or used",
     });

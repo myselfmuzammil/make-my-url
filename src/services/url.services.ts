@@ -1,18 +1,17 @@
-import {Schema} from "mongoose";
-
 import {URLModel} from "../models";
 import {CreateUrlSchema} from "../schema";
-import {ErrorHandler} from "../utils";
+import {ApiError} from "../utils";
+import type {JwtDecodedUser, UrlIdParam} from "../types";
 
 export async function createURLService({
   urlTitle,
   redirectedUrl,
-  _id: createdBy,
-}: CreateUrlSchema & {_id: Schema.Types.ObjectId}) {
+  _id,
+}: CreateUrlSchema & JwtDecodedUser["user"]) {
   const URL = await URLModel.create({
     urlTitle,
     redirectedUrl,
-    createdBy,
+    createdBy: _id,
   });
 
   return {
@@ -25,11 +24,11 @@ export async function createURLService({
   };
 }
 
-export async function findUrlByIdAndIncrement(id: Schema.Types.ObjectId) {
-  const URL = await URLModel.findByIdAndUpdate(id, {$inc: {visits: 1}});
+export async function findUrlByIdAndIncrement(_id: UrlIdParam["_id"]) {
+  const URL = await URLModel.findByIdAndUpdate(_id, {$inc: {visits: 1}});
 
   if (!URL)
-    throw new ErrorHandler({
+    throw new ApiError({
       message: "URL not found",
       statusCode: 404,
     });

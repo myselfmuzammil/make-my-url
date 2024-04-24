@@ -1,31 +1,31 @@
 version: "3.8"
 
 services:
-  short-url-backend-service:
-    image: short-url-backend
-    container_name: short-url-backend-container
-    env_file:
-      - ./.env
+  backend:
+    build: ./
+    environment:
+      - MONGO_URI=mongodb://localhost:27017
+      - CORS_ORIGIN="*"
+      - ACCESS_TOKEN_SECRET=654b61a663198ea31604afd7
+      - ACCESS_TOKEN_EXPIRY=2m
+      - REFRESH_TOKEN_SECRET=654bcfa84d040be1ec289e8d
+      - REFRESH_TOKEN_EXPIRY=1d
     networks:
-      - short-url-network
+      - primary-net
     ports:
       - "3000:3000"
     depends_on:
-      - mongo-service
+      - database
 
-  mongo-service:
+  database:
     image: mongo
-    container_name: mongo-container
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
     volumes:
       - mongodb:/data/db
     networks:
-      - short-url-network
+      - primary-net
 
 networks:
-  short-url-network:
+  primary-net:
 
 volumes:
   mongodb:
