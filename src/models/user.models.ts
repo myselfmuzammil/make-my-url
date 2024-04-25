@@ -1,9 +1,10 @@
 import mongoose, {Model} from "mongoose";
 import bcrypt from "bcrypt";
-import jwt, {Secret} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import _ from "lodash";
 
-import type {UserDocument, UserMethods} from "../types";
+import type {UserDocument, UserMethods} from "../types/index.js";
+import {env} from "../env.js";
 
 export const userSchema = new mongoose.Schema<
   UserDocument,
@@ -60,19 +61,17 @@ userSchema.methods.generateAccessToken = function () {
 
   return jwt.sign(
     _.omit(user.toJSON(), ["password", "refreshToken"]),
-    process.env.ACCESS_TOKEN_SECRET as Secret,
-    {expiresIn: process.env.ACCESS_TOKEN_EXPIRY}
+    env.ACCESS_TOKEN_SECRET,
+    {expiresIn: env.ACCESS_TOKEN_EXPIRY}
   );
 };
 
 userSchema.methods.generateRefreshToken = function () {
   const user = this as UserDocument & UserMethods;
 
-  return jwt.sign(
-    _.pick(user.toJSON(), "_id"),
-    process.env.REFRESH_TOKEN_SECRET as Secret,
-    {expiresIn: process.env.REFRESH_TOKEN_EXPIRY}
-  );
+  return jwt.sign(_.pick(user.toJSON(), "_id"), env.REFRESH_TOKEN_SECRET, {
+    expiresIn: env.REFRESH_TOKEN_EXPIRY,
+  });
 };
 
 export const UserModel = mongoose.model<

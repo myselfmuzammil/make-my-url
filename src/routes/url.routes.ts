@@ -4,9 +4,9 @@ import z from "zod";
 import {
   createURLController,
   getURLByIdAndRedirectController,
-} from "../controllers";
-import {verifyJWT, validateSchema} from "../middlewares";
-import {createUrlSchema} from "../schema";
+} from "../controllers/index.js";
+import {verifyJWT, validateSchema} from "../middlewares/index.js";
+import {createUrlSchema} from "../schema/index.js";
 
 const router: Router = express.Router();
 const urlRoute: Express = express();

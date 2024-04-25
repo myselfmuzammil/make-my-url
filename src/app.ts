@@ -7,14 +7,15 @@ import {
   apiErrorHandler,
   jwtErrorHandler,
   errorHandler,
-} from "./middlewares";
-import appRouter from "./routes";
+} from "./middlewares/index.js";
+import {env} from "./env.js";
+import appRouter from "./routes/index.js";
 
 const app: Express = express();
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: env.CORS_ORIGIN,
     credentials: true,
   })
 );

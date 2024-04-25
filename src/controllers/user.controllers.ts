@@ -1,14 +1,18 @@
 import {Request, Response} from "express";
 
-import {catchAsyncErrorHandler} from "../utils";
+import {catchAsyncErrorHandler} from "../utils/index.js";
 import {
   loginService,
   signupService,
   regenerateAccessAndRefreshTokens,
-} from "../services";
-import type {SignupSchema, LoginSchema, RefreshTokenSchema} from "../schema";
-import type {JwtDecodedUser} from "../types";
-import {UserModel} from "../models";
+} from "../services/index.js";
+import type {
+  SignupSchema,
+  LoginSchema,
+  RefreshTokenSchema,
+} from "../schema/index.js";
+import type {JwtDecodedUser} from "../types/index.js";
+import {UserModel} from "../models/index.js";
 
 export const signupController = catchAsyncErrorHandler(async function (
   req: Request<{}, {}, SignupSchema>,

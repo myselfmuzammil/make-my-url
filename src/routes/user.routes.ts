@@ -5,9 +5,13 @@ import {
   loginController,
   refreshTokenController,
   logoutUser,
-} from "../controllers";
-import {validateSchema, verifyJWT} from "../middlewares";
-import {loginSchema, refreshTokenSchema, signupSchema} from "../schema";
+} from "../controllers/index.js";
+import {validateSchema, verifyJWT} from "../middlewares/index.js";
+import {
+  loginSchema,
+  refreshTokenSchema,
+  signupSchema,
+} from "../schema/index.js";
 
 const router: Router = express.Router();
 const userRoute: Express = express();

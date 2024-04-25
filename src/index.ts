@@ -1,10 +1,11 @@
-import app from "./app";
-import {connectDB} from "./db";
+import app from "./app.js";
+import {connectDB} from "./db/index.js";
+import {env} from "./env.js";
 
 (async () => {
   await connectDB();
 
-  app.listen(process.env.PORT, () => {
-    console.log(`Server listening at Port: ${process.env.PORT} 🙌`);
+  app.listen(env.PORT, () => {
+    console.log(`Server listening at Port: ${env.PORT} 🙌`);
   });
 })();

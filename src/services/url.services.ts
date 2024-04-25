@@ -1,7 +1,7 @@
-import {URLModel} from "../models";
-import {CreateUrlSchema} from "../schema";
-import {ApiError} from "../utils";
-import type {JwtDecodedUser, UrlIdParam} from "../types";
+import {URLModel} from "../models/index.js";
+import {CreateUrlSchema} from "../schema/index.js";
+import {ApiError} from "../utils/index.js";
+import type {JwtDecodedUser, UrlIdParam} from "../types/index.js";
 
 export async function createURLService({
   urlTitle,

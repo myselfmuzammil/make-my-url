@@ -1,15 +1,18 @@
 {
   "name": "make-my-url",
+  "type": "module",
   "scripts": {
     "build": "tsc -b",
     "start": "node --env-file .env \"./dist/index.js\"",
-    "dev": "concurrently \"tsc --watch\" \"nodemon --env-file .env dist/index.js\"",
+    "dev": "concurrently \"tsc --watch\" \"nodemon --watch .env --env-file .env dist/index.js\"",
     "format": "prettier --write \"**/*.{ts,json,md}\"",
+    "lint": "tsc --noEmit",
     "clean": "git clean -xfd"
   },
   "author": "muzammil",
   "license": "ISC",
   "dependencies": {
+    "@t3-oss/env-core": "^0.10.1",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -17,7 +20,6 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "mongoose": "^7.6.3",
-    "nodemailer": "^6.9.7",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -28,7 +30,6 @@
     "@types/jsonwebtoken": "^9.0.5",
     "@types/lodash": "^4.14.201",
     "@types/node": "^20.8.10",
-    "@types/nodemailer": "^6.4.14",
     "concurrently": "^8.2.2",
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",

@@ -1,9 +1,9 @@
 import {Request, Response} from "express";
 
-import {catchAsyncErrorHandler} from "../utils";
-import {createURLService, findUrlByIdAndIncrement} from "../services";
-import type {CreateUrlSchema} from "../schema";
-import type {JwtDecodedUser, UrlIdParam} from "../types";
+import {catchAsyncErrorHandler} from "../utils/index.js";
+import {createURLService, findUrlByIdAndIncrement} from "../services/index.js";
+import type {CreateUrlSchema} from "../schema/index.js";
+import type {JwtDecodedUser, UrlIdParam} from "../types/index.js";
 
 export const createURLController = catchAsyncErrorHandler(async function (
   req: Request<{}, {}, CreateUrlSchema> & JwtDecodedUser,

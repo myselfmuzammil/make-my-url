@@ -1,5 +1,7 @@
 import mongoose, {Model, Schema} from "mongoose";
-import {UrlDocument, UrlMethods} from "../types";
+
+import type {UrlDocument, UrlMethods} from "../types/index.js";
+import {env} from "../env.js";
 
 const urlSchema = new mongoose.Schema<
   UrlDocument,
@@ -35,7 +37,7 @@ const urlSchema = new mongoose.Schema<
 urlSchema.methods.generateURL = function () {
   const url = this as UrlDocument & UrlMethods;
 
-  const {PROTOCOL, HOST_NAME, PORT} = process.env;
+  const {PROTOCOL, HOST_NAME, PORT} = env;
   return `${PROTOCOL}://${HOST_NAME}:${PORT}/api/v1/url/redirect/${url._id}`;
 };
 

@@ -1,8 +1,10 @@
-import jwt, {Secret} from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
-import {UserModel} from "../models";
-import {ApiError} from "../utils";
-import {LoginSchema, SignupSchema} from "../schema";
+import {UserModel} from "../models/index.js";
+import {ApiError} from "../utils/index.js";
+import {env} from "../env.js";
+import type {LoginSchema, SignupSchema} from "../schema/index.js";
+import type {JwrtDecodedUser} from "../types/index.js";
 
 export async function loginService({email, password}: LoginSchema) {
   const user = await UserModel.findOne({email}).select("+password");
@@ -40,10 +42,9 @@ export async function signupService({email, name, password}: SignupSchema) {
 }
 
 export async function regenerateAccessAndRefreshTokens(refreshToken: string) {
-  const {_id} = jwt.verify(
-    refreshToken,
-    process.env.REFRESH_TOKEN_SECRET as Secret
-  ) as {_id: string};
+  const {_id} = <JwrtDecodedUser>(
+    jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
+  );
 
   const user = await UserModel.findById(_id).select("+refreshToken");
 

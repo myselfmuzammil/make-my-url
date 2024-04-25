@@ -1,8 +1,10 @@
-import {NextFunction, Request, Response} from "express";
+import type {NextFunction, Request, Response} from "express";
+import * as jwt from "jsonwebtoken";
 import {ZodError} from "zod";
 
-import {ApiError} from "../utils";
-import {JsonWebTokenError} from "jsonwebtoken";
+import {ApiError} from "../utils/index.js";
+
+const {JsonWebTokenError} = jwt;
 
 export function zodErrorHandler(
   error: unknown,

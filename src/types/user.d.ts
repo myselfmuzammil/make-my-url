@@ -19,3 +19,5 @@ export type UserMethods = {
 export type JwtDecodedUser = {
   user: Omit<User, "password" | "refreshToken">;
 };
+
+export type JwrtDecodedUser = Pick<User, "_id">;

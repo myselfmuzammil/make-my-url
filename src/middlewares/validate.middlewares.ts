@@ -1,4 +1,4 @@
-import {Request, Response, NextFunction} from "express";
+import type {Request, Response, NextFunction} from "express";
 import z, {ZodType} from "zod";
 import _ from "lodash";
 

@@ -1,4 +1,4 @@
-import {ApiController} from "../types";
+import type {ApiController} from "../types/index.js";
 
 export class ApiError extends Error {
   statusCode: number;
