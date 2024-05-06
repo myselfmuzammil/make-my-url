@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc -b",
     "start": "node --env-file .env \"./dist/index.js\"",
-    "dev": "concurrently \"tsc --watch\" \"nodemon --watch .env --env-file .env dist/index.js\"",
+    "dev": "concurrently \"tsc --watch\" \"nodemon --env-file=.env --watch=.env dist/index.js\"",
     "format": "prettier --write \"**/*.{ts,json,md}\"",
     "lint": "tsc --noEmit",
     "clean": "git clean -xfd"
@@ -31,11 +31,8 @@
     "@types/lodash": "^4.14.201",
     "@types/node": "^20.8.10",
     "concurrently": "^8.2.2",
-    "nodemon": "^3.0.1",
+    "nodemon": "^3.1.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
-  },
-  "engines": {
-    "node": "^18"
   }
 }
