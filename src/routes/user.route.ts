@@ -1,12 +1,12 @@
 import express, {Router, Express} from "express";
 
 import {
-  signupController,
-  loginController,
-  refreshTokenController,
+  signupUser,
+  loginUser,
+  refreshUserToken,
   logoutUser,
 } from "../controllers/index.js";
-import {validateSchema, verifyJWT} from "../middlewares/index.js";
+import {validateSchema, authenticateUser} from "../middlewares/index.js";
 import {
   loginSchema,
   refreshTokenSchema,
@@ -21,7 +21,7 @@ router.post(
   validateSchema({
     body: signupSchema,
   }),
-  signupController
+  signupUser
 );
 
 router.post(
@@ -29,17 +29,17 @@ router.post(
   validateSchema({
     body: loginSchema,
   }),
-  loginController
+  loginUser
 );
 
-router.patch("/logout", verifyJWT, logoutUser);
+router.patch("/logout", authenticateUser, logoutUser);
 
 router.post(
   "/refreshToken",
   validateSchema({
     body: refreshTokenSchema,
   }),
-  refreshTokenController
+  refreshUserToken
 );
 
 userRoute.use("/user", router);

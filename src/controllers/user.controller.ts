@@ -1,6 +1,7 @@
 import {Request, Response} from "express";
 
-import {catchAsyncErrorHandler} from "../utils/index.js";
+import {asyncHandler} from "../utils/index.js";
+import type {JwtDecodedUser} from "../types/index.js";
 import {
   loginService,
   signupService,
@@ -11,10 +12,9 @@ import type {
   LoginSchema,
   RefreshTokenSchema,
 } from "../schema/index.js";
-import type {JwtDecodedUser} from "../types/index.js";
 import {UserModel} from "../models/index.js";
 
-export const signupController = catchAsyncErrorHandler(async function (
+export const signupUser = asyncHandler(async function (
   req: Request<{}, {}, SignupSchema>,
   res: Response
 ) {
@@ -26,7 +26,7 @@ export const signupController = catchAsyncErrorHandler(async function (
   });
 });
 
-export const loginController = catchAsyncErrorHandler(async function (
+export const loginUser = asyncHandler(async function (
   req: Request<{}, {}, LoginSchema>,
   res: Response
 ) {
@@ -35,7 +35,7 @@ export const loginController = catchAsyncErrorHandler(async function (
   return res.json(tokens);
 });
 
-export const logoutUser = catchAsyncErrorHandler(async function (
+export const logoutUser = asyncHandler(async function (
   req: Request & JwtDecodedUser,
   res: Response
 ) {
@@ -50,11 +50,12 @@ export const logoutUser = catchAsyncErrorHandler(async function (
   });
 });
 
-export const refreshTokenController = catchAsyncErrorHandler(async function (
+export const refreshUserToken = asyncHandler(async function (
   req: Request<{}, {}, RefreshTokenSchema>,
   res: Response
 ) {
   const {refreshToken} = req.body;
+
   const tokens = await regenerateAccessAndRefreshTokens(refreshToken);
 
   return res.json(tokens);

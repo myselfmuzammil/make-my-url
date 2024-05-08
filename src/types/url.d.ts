@@ -11,7 +11,6 @@ export type Url = {
 };
 
 export type UrlDocument = Url & Document;
-export type UrlIdParam = Pick<Url, "_id">;
 
 export type UrlMethods = {
   generateURL(): string;

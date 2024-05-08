@@ -26,10 +26,7 @@ export function apiErrorHandler(
   next: NextFunction
 ) {
   if (error instanceof ApiError) {
-    return res.status(error.statusCode).json({
-      ...error,
-      message: error.message,
-    });
+    return res.status(error.statusCode).json(error);
   } else {
     next(error);
   }

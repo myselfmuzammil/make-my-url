@@ -1,18 +1,23 @@
+import {NextFunction, Request, RequestHandler, Response} from "express";
 import type {ApiController} from "../types/index.js";
 
 export class ApiError extends Error {
-  statusCode: number;
-  errors: any[];
-  success: boolean;
+  public name: string;
+  public message: string;
+  public errors: Error[];
+  public statusCode: number;
+  public success: boolean;
 
   constructor({
+    name = "",
     statusCode = 500,
     stack = "",
     message = "Something went wrong",
-    errors = [],
+    errors = [] as Error[],
   }) {
-    super(message);
+    super();
 
+    this.name = name;
     this.message = message;
     this.success = statusCode < 400;
     this.statusCode = statusCode;
@@ -26,10 +31,14 @@ export class ApiError extends Error {
   }
 }
 
-export function catchAsyncErrorHandler(
-  requestHandler: Function
-): ApiController {
+export function asyncHandler<T>(
+  requestHandler: ApiController<T>
+): RequestHandler {
   return (req, res, next) => {
     Promise.resolve(requestHandler(req, res, next)).catch(next);
   };
 }
+
+const sd = asyncHandler<(req: Request<{id: string}> & {user: string}) => any>(
+  (req) => req
+);

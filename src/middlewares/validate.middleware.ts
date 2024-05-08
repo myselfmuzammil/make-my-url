@@ -1,13 +1,13 @@
 import type {Request, Response, NextFunction} from "express";
-import z, {ZodType} from "zod";
+import z, {ZodRawShape, ZodType} from "zod";
 import _ from "lodash";
 
-export function validateSchema(
-  schema: Partial<Record<keyof Request, ZodType>>
+export function validateSchema<T>(
+  schema: Partial<Record<keyof (T & Request), ZodType>>
 ) {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      z.object(schema).parse(_.pick(req, _.keys(schema)));
+      z.object(schema as ZodRawShape).parse(_.pick(req, _.keys(schema)));
       next();
     } catch (error) {
       next(error);

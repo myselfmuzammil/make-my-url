@@ -11,8 +11,9 @@ export async function loginService({email, password}: LoginSchema) {
 
   if (!(user && (await user.isPasswordCorrect(password)))) {
     throw new ApiError({
-      statusCode: 401,
+      name: "Log in",
       message: "Invalid user credentials",
+      statusCode: 401,
     });
   }
 
@@ -35,32 +36,37 @@ export async function signupService({email, name, password}: SignupSchema) {
     });
   } else {
     throw new ApiError({
-      statusCode: 409,
+      name: "Sign up",
       message: "Email is already registered",
+      statusCode: 409,
     });
   }
 }
 
-export async function regenerateAccessAndRefreshTokens(refreshToken: string) {
-  const {_id} = <JwrtDecodedUser>(
-    jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET)
-  );
+export async function regenerateAccessAndRefreshTokens(token: string) {
+  try {
+    const {_id} = <JwrtDecodedUser>jwt.verify(token, env.REFRESH_TOKEN_SECRET);
 
-  const user = await UserModel.findById(_id).select("+refreshToken");
+    const user = await UserModel.findById(_id).select("+refreshToken");
 
-  if (refreshToken !== user?.refreshToken) {
+    if (token !== user?.refreshToken) {
+      throw new Error();
+    }
+
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    user.refreshToken = refreshToken;
+
+    await user.save();
+
+    return {accessToken, refreshToken};
+  } catch (error) {
     throw new ApiError({
+      name: "Authorization",
+      message: "Refresh token is expired or used",
+      errors: [error as Error],
       statusCode: 401,
-      message: "refresh token is expired or used",
     });
   }
-
-  const accessToken = user.generateAccessToken();
-  const newRefreshToken = user.generateRefreshToken();
-
-  user.refreshToken = newRefreshToken;
-
-  await user.save();
-
-  return {accessToken, newRefreshToken};
 }

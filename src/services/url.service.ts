@@ -1,13 +1,13 @@
 import {URLModel} from "../models/index.js";
-import {CreateUrlSchema} from "../schema/index.js";
 import {ApiError} from "../utils/index.js";
-import type {JwtDecodedUser, UrlIdParam} from "../types/index.js";
+import type {JwtDecodedUser} from "../types/index.js";
+import type {UrlBody, UrlParams} from "../schema/index.js";
 
 export async function createURLService({
   urlTitle,
   redirectedUrl,
   _id,
-}: CreateUrlSchema & JwtDecodedUser["user"]) {
+}: UrlBody & JwtDecodedUser["user"]) {
   const URL = await URLModel.create({
     urlTitle,
     redirectedUrl,
@@ -24,7 +24,7 @@ export async function createURLService({
   };
 }
 
-export async function findUrlByIdAndIncrement(_id: UrlIdParam["_id"]) {
+export async function findUrlByIdAndIncrement(_id: UrlParams["_id"]) {
   const URL = await URLModel.findByIdAndUpdate(_id, {$inc: {visits: 1}});
 
   if (!URL)
