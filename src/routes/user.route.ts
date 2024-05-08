@@ -5,10 +5,12 @@ import {
   loginUser,
   refreshUserToken,
   logoutUser,
+  resetPassword,
 } from "../controllers/index.js";
 import {validateSchema, authenticateUser} from "../middlewares/index.js";
 import {
   loginSchema,
+  oldAndNewPasswords,
   refreshTokenSchema,
   signupSchema,
 } from "../schema/index.js";
@@ -40,6 +42,15 @@ router.post(
     body: refreshTokenSchema,
   }),
   refreshUserToken
+);
+
+router.post(
+  "/resetPassword",
+  authenticateUser,
+  validateSchema({
+    body: oldAndNewPasswords,
+  }),
+  resetPassword
 );
 
 userRoute.use("/user", router);

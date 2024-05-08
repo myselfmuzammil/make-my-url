@@ -11,7 +11,7 @@ export type User = {
 export type UserDocument = User & Document;
 
 export type UserMethods = {
-  isPasswordCorrect(password: string);
+  comparePassword(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
 };

@@ -9,7 +9,7 @@ import type {JwrtDecodedUser} from "../types/index.js";
 export async function loginService({email, password}: LoginSchema) {
   const user = await UserModel.findOne({email}).select("+password");
 
-  if (!(user && (await user.isPasswordCorrect(password)))) {
+  if (!(user && (await user.comparePassword(password)))) {
     throw new ApiError({
       name: "Log in",
       message: "Invalid user credentials",

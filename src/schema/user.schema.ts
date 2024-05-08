@@ -43,6 +43,12 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string({required_error: "Unauthorized request"}),
 });
 
+export const oldAndNewPasswords = z.object({
+  oldPassword: z.string(),
+  newPassword: z.string(),
+});
+
 export type SignupSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;
+export type OldAndNewPasswordsBody = z.infer<typeof oldAndNewPasswords>;
 export type RefreshTokenSchema = z.infer<typeof refreshTokenSchema>;

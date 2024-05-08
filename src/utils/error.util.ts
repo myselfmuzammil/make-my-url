@@ -38,7 +38,3 @@ export function asyncHandler<T>(
     Promise.resolve(requestHandler(req, res, next)).catch(next);
   };
 }
-
-const sd = asyncHandler<(req: Request<{id: string}> & {user: string}) => any>(
-  (req) => req
-);

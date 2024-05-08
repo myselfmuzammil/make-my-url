@@ -1,6 +1,6 @@
 import {Request, Response} from "express";
 
-import {asyncHandler} from "../utils/index.js";
+import {ApiError, asyncHandler} from "../utils/index.js";
 import type {JwtDecodedUser} from "../types/index.js";
 import {
   loginService,
@@ -11,6 +11,7 @@ import type {
   SignupSchema,
   LoginSchema,
   RefreshTokenSchema,
+  OldAndNewPasswordsBody,
 } from "../schema/index.js";
 import {UserModel} from "../models/index.js";
 
@@ -39,7 +40,7 @@ export const logoutUser = asyncHandler(async function (
   req: Request & JwtDecodedUser,
   res: Response
 ) {
-  const user = await UserModel.findByIdAndUpdate(req.user._id, {
+  await UserModel.findByIdAndUpdate(req.user._id, {
     $set: {refreshToken: ""},
   });
 
@@ -47,6 +48,32 @@ export const logoutUser = asyncHandler(async function (
     statusCode: 200,
     success: true,
     message: "logout successfully",
+  });
+});
+
+export const resetPassword = asyncHandler(async function (
+  req: Request<{}, {}, OldAndNewPasswordsBody> & JwtDecodedUser,
+  res: Response
+) {
+  const {oldPassword, newPassword} = req.body;
+
+  const user = await UserModel.findById(req.user._id).select("+password");
+
+  if (!(user && (await user.comparePassword(oldPassword)))) {
+    throw new ApiError({
+      name: "Reset Password",
+      message: "Wrong password",
+      statusCode: 400,
+    });
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  return res.json({
+    message: "Password reset successfully",
+    statusCode: 200,
+    success: true,
   });
 });
 
