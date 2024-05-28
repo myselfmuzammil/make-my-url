@@ -3,12 +3,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import _ from "lodash";
 
-import type {UserDocument, UserMethods} from "../types/index.js";
+import type {
+  UserDocument,
+  UserMethods,
+  UserStaticMethodes,
+} from "../types/index.js";
 import {env} from "../env.js";
+import {SignupSchema} from "../schema/user.schema.js";
+import {ApiError} from "../utils/error.js";
 
 export const userSchema = new mongoose.Schema<
   UserDocument,
-  Model<UserDocument, {}, UserMethods>,
+  UserStaticMethodes & Model<UserDocument, {}, UserMethods>,
   UserMethods
 >({
   name: {
@@ -50,14 +56,40 @@ userSchema.pre("save", async function (next) {
   return next();
 });
 
-userSchema.methods.comparePassword = async function (password) {
-  const user = this as UserDocument & UserMethods;
+userSchema.pre(
+  "deleteOne",
+  {document: true, query: false},
+  async function (next) {
+    await this.model("Url").deleteMany({createdBy: this._id});
 
-  return bcrypt.compare(password, user.password);
+    next();
+  }
+);
+
+userSchema.methods.comparePassword = async function (password) {
+  const user = <UserDocument & UserMethods>this;
+
+  return bcrypt.compare(password, user.password || "");
+};
+
+userSchema.methods.resetPassword = async function ({oldPassword, newPassword}) {
+  const user = <UserDocument & UserMethods>this;
+
+  if (!(await user.comparePassword(oldPassword))) {
+    throw new ApiError({
+      name: "Reset Password",
+      message: "Wrong password",
+      statusCode: 400,
+    });
+  }
+
+  user.password = newPassword;
+
+  return user.save();
 };
 
 userSchema.methods.generateAccessToken = function () {
-  const user = this as UserDocument & UserMethods;
+  const user = <UserDocument & UserMethods>this;
 
   return jwt.sign(
     _.omit(user.toJSON(), ["password", "refreshToken"]),
@@ -67,14 +99,26 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  const user = this as UserDocument & UserMethods;
+  const user = <UserDocument & UserMethods>this;
 
   return jwt.sign(_.pick(user.toJSON(), "_id"), env.REFRESH_TOKEN_SECRET, {
     expiresIn: env.REFRESH_TOKEN_EXPIRY,
   });
 };
 
+userSchema.statics.createIfNotExists = async function (user: SignupSchema) {
+  if (await this.findOne({email: user.email})) {
+    throw new ApiError({
+      name: "Sign up",
+      message: "Email is already registered",
+      statusCode: 409,
+    });
+  }
+
+  return this.create(user);
+};
+
 export const UserModel = mongoose.model<
   UserDocument,
-  Model<UserDocument, {}, UserMethods>
+  UserStaticMethodes & Model<UserDocument, {}, UserMethods>
 >("User", userSchema);

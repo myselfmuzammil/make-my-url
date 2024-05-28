@@ -1,11 +1,12 @@
-import {Request, Response, NextFunction} from "express";
+import {Response, NextFunction} from "express";
 import jwt from "jsonwebtoken";
 
-import {ApiError} from "../utils/index.js";
+import {ApiError, ApiRequest} from "../utils/index.js";
 import {env} from "../env.js";
+import {JwtDecodedUser} from "../types/user.js";
 
 export function authenticateUser(
-  req: Request,
+  req: ApiRequest<{}, JwtDecodedUser>,
   res: Response,
   next: NextFunction
 ) {
@@ -21,7 +22,7 @@ export function authenticateUser(
     );
   }
 
-  jwt.verify(token, env.ACCESS_TOKEN_SECRET, (error, user) => {
+  return jwt.verify(token, env.ACCESS_TOKEN_SECRET, (error, user) => {
     if (error) {
       return next(
         new ApiError({
@@ -33,7 +34,7 @@ export function authenticateUser(
       );
     }
 
-    (req as Request & {user: typeof user}).user = user;
+    req.locals.user = <JwtDecodedUser["user"]>user;
 
     return next();
   });

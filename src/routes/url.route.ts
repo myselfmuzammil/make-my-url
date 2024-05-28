@@ -1,6 +1,6 @@
 import express, {Express, Router} from "express";
 
-import {createUrl, redirectUser} from "../controllers/index.js";
+import {createUrlHandler, redirectUser} from "../controllers/index.js";
 import {authenticateUser, validateSchema} from "../middlewares/index.js";
 import {urlBodySchema, urlParamSchema} from "../schema/index.js";
 
@@ -13,7 +13,7 @@ router.post(
   validateSchema({
     body: urlBodySchema,
   }),
-  createUrl
+  createUrlHandler
 );
 
 router.get(

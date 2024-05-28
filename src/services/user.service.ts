@@ -1,12 +1,14 @@
 import jwt from "jsonwebtoken";
+import _ from "lodash";
 
 import {UserModel} from "../models/index.js";
 import {ApiError} from "../utils/index.js";
-import {env} from "../env.js";
 import type {LoginSchema, SignupSchema} from "../schema/index.js";
-import type {JwrtDecodedUser} from "../types/index.js";
+import {env} from "../env.js";
+import type {JwrtDecodedUser, User} from "../types/user.js";
 
-export async function loginService({email, password}: LoginSchema) {
+export async function loginUser(cred: LoginSchema) {
+  const {email, password} = cred;
   const user = await UserModel.findOne({email}).select("+password");
 
   if (!(user && (await user.comparePassword(password)))) {
@@ -21,26 +23,56 @@ export async function loginService({email, password}: LoginSchema) {
   const refreshToken = user.generateRefreshToken();
 
   user.refreshToken = refreshToken;
-
   await user.save();
 
   return {accessToken, refreshToken};
 }
 
-export async function signupService({email, name, password}: SignupSchema) {
-  if (!(await UserModel.findOne({email}))) {
-    return UserModel.create({
-      email,
-      name,
-      password,
-    });
-  } else {
+export async function createUser(user: SignupSchema) {
+  const newUser = await UserModel.createIfNotExists(user);
+
+  return _.omit(newUser.toJSON(), "password");
+}
+
+export async function findUser(
+  id: string,
+  select: {[T in keyof User]?: boolean} = {}
+) {
+  const user = await UserModel.findById(id).select(
+    Object.keys(select)
+      .map((key) => (select[key as keyof User] ? `+${key}` : `-${key}`))
+      .join(" ")
+  );
+
+  if (!user) {
     throw new ApiError({
-      name: "Sign up",
-      message: "Email is already registered",
-      statusCode: 409,
+      name: "Invalid user id",
+      message: "user does not exist",
+      statusCode: 400,
     });
   }
+
+  return user;
+}
+
+export async function deleteUser(id: JwrtDecodedUser["_id"]) {
+  const user = await UserModel.findById(id);
+
+  if (!user) {
+    throw new ApiError({
+      name: "user deletion",
+      message: "User permanently deleted",
+      statusCode: 410,
+    });
+  }
+
+  return user.deleteOne();
+}
+
+export async function logoutUser(id: JwrtDecodedUser["_id"]) {
+  return UserModel.findByIdAndUpdate(id, {
+    $set: {refreshToken: ""},
+  });
 }
 
 export async function regenerateAccessAndRefreshTokens(token: string) {
@@ -61,11 +93,11 @@ export async function regenerateAccessAndRefreshTokens(token: string) {
     await user.save();
 
     return {accessToken, refreshToken};
-  } catch (error) {
+  } catch (e) {
     throw new ApiError({
       name: "Authorization",
       message: "Refresh token is expired or used",
-      errors: [error as Error],
+      errors: [e],
       statusCode: 401,
     });
   }

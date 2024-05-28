@@ -1,19 +1,20 @@
 import express, {Router, Express} from "express";
 
 import {
-  signupUser,
-  loginUser,
-  refreshUserToken,
-  logoutUser,
-  resetPassword,
-} from "../controllers/index.js";
-import {validateSchema, authenticateUser} from "../middlewares/index.js";
-import {
   loginSchema,
+  signupSchema,
   oldAndNewPasswords,
   refreshTokenSchema,
-  signupSchema,
 } from "../schema/index.js";
+import {
+  createUserHandler,
+  deleteUserHandler,
+  loginUserHandler,
+  logoutUserHandler,
+  refreshUserToken,
+  resetPasswordHandler,
+} from "../controllers/index.js";
+import {validateSchema, authenticateUser} from "../middlewares/index.js";
 
 const router: Router = express.Router();
 const userRoute: Express = express();
@@ -23,7 +24,7 @@ router.post(
   validateSchema({
     body: signupSchema,
   }),
-  signupUser
+  createUserHandler
 );
 
 router.post(
@@ -31,10 +32,8 @@ router.post(
   validateSchema({
     body: loginSchema,
   }),
-  loginUser
+  loginUserHandler
 );
-
-router.patch("/logout", authenticateUser, logoutUser);
 
 router.post(
   "/refreshToken",
@@ -50,8 +49,11 @@ router.post(
   validateSchema({
     body: oldAndNewPasswords,
   }),
-  resetPassword
+  resetPasswordHandler
 );
+
+router.delete("/logout", authenticateUser, logoutUserHandler);
+router.delete("/delete", authenticateUser, deleteUserHandler);
 
 userRoute.use("/user", router);
 

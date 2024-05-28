@@ -1,7 +1,7 @@
 import type {Request, Response, NextFunction} from "express";
 
-export type ApiController<T> = (
-  req: Request & Parameters<T>[1],
-  res: Response & Parameters<T>[2],
-  next: NextFunction
-) => any;
+export type ApiController<T, U> = (
+  req: Request & T,
+  res: Response & U,
+  next?: NextFunction
+) => Promise<Response & U>;

@@ -1,11 +1,11 @@
-import {Request, Response} from "express";
-
-import {ApiError, asyncHandler} from "../utils/index.js";
 import type {JwtDecodedUser} from "../types/index.js";
 import {
-  loginService,
-  signupService,
+  loginUser,
+  createUser,
+  deleteUser,
+  logoutUser,
   regenerateAccessAndRefreshTokens,
+  findUser,
 } from "../services/index.js";
 import type {
   SignupSchema,
@@ -13,77 +13,72 @@ import type {
   RefreshTokenSchema,
   OldAndNewPasswordsBody,
 } from "../schema/index.js";
-import {UserModel} from "../models/index.js";
+import {asyncHandler, ApiRequest, ApiResponse} from "../utils/index.js";
 
-export const signupUser = asyncHandler(async function (
-  req: Request<{}, {}, SignupSchema>,
-  res: Response
+export const createUserHandler = asyncHandler(async function (
+  req: ApiRequest<{body: SignupSchema}>
 ) {
-  await signupService(req.body);
+  const user = await createUser(req.body);
 
-  return res.status(201).json({
-    success: true,
-    message: "SignUp successfully!",
+  return new ApiResponse(user, {
+    message: "user registared successfully",
+    statusCode: 201,
   });
 });
 
-export const loginUser = asyncHandler(async function (
-  req: Request<{}, {}, LoginSchema>,
-  res: Response
+export const loginUserHandler = asyncHandler(async function (
+  req: ApiRequest<{body: LoginSchema}>
 ) {
-  const tokens = await loginService(req.body);
+  const tokens = await loginUser(req.body);
 
-  return res.json(tokens);
-});
-
-export const logoutUser = asyncHandler(async function (
-  req: Request & JwtDecodedUser,
-  res: Response
-) {
-  await UserModel.findByIdAndUpdate(req.user._id, {
-    $set: {refreshToken: ""},
-  });
-
-  return res.json({
-    statusCode: 200,
-    success: true,
-    message: "logout successfully",
+  return new ApiResponse(tokens, {
+    message: "User loged in successfully",
   });
 });
 
-export const resetPassword = asyncHandler(async function (
-  req: Request<{}, {}, OldAndNewPasswordsBody> & JwtDecodedUser,
-  res: Response
+export const logoutUserHandler = asyncHandler(async function (
+  req: ApiRequest<{}, JwtDecodedUser>
 ) {
-  const {oldPassword, newPassword} = req.body;
+  const id = req.locals.user._id;
+  await logoutUser(id);
 
-  const user = await UserModel.findById(req.user._id).select("+password");
+  return new ApiResponse(null, {
+    message: "user loged out successfully",
+  });
+});
 
-  if (!(user && (await user.comparePassword(oldPassword)))) {
-    throw new ApiError({
-      name: "Reset Password",
-      message: "Wrong password",
-      statusCode: 400,
-    });
-  }
+export const resetPasswordHandler = asyncHandler(async function (
+  req: ApiRequest<{body: OldAndNewPasswordsBody}, JwtDecodedUser>
+) {
+  const {_id} = req.locals.user;
 
-  user.password = newPassword;
-  await user.save();
+  const user = await findUser(_id, {password: true});
+  await user.resetPassword(req.body);
 
-  return res.json({
+  return new ApiResponse(null, {
     message: "Password reset successfully",
-    statusCode: 200,
-    success: true,
+  });
+});
+
+export const deleteUserHandler = asyncHandler(async function (
+  req: ApiRequest<{}, JwtDecodedUser>
+) {
+  const id = req.locals.user._id;
+  await deleteUser(id);
+
+  return new ApiResponse(null, {
+    message: "User permanently deleted",
   });
 });
 
 export const refreshUserToken = asyncHandler(async function (
-  req: Request<{}, {}, RefreshTokenSchema>,
-  res: Response
+  req: ApiRequest<{body: RefreshTokenSchema}>
 ) {
-  const {refreshToken} = req.body;
-
+  const refreshToken = req.body.refreshToken;
   const tokens = await regenerateAccessAndRefreshTokens(refreshToken);
 
-  return res.json(tokens);
+  return new ApiResponse(tokens, {
+    message: "New access and refresh tokens created",
+    statusCode: 201,
+  });
 });

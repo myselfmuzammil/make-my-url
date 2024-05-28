@@ -1,7 +1,8 @@
-import {Document, Schema} from "mongoose";
+import {Document, HydratedDocument, Schema} from "mongoose";
+import {OldAndNewPasswordsBody, SignupSchema} from "../schema";
 
 export type User = {
-  _id: Schema.Types.ObjectId;
+  _id: string;
   name: string;
   email: string;
   password: string;
@@ -14,6 +15,13 @@ export type UserMethods = {
   comparePassword(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
+  resetPassword(passwords: OldAndNewPasswordsBody);
+};
+
+export type UserStaticMethodes = {
+  createIfNotExists(
+    user: SignupSchema
+  ): Promise<HydratedDocument<User, UserMethods>>;
 };
 
 export type JwtDecodedUser = {

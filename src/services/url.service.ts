@@ -3,7 +3,7 @@ import {ApiError} from "../utils/index.js";
 import type {JwtDecodedUser} from "../types/index.js";
 import type {UrlBody, UrlParams} from "../schema/index.js";
 
-export async function createURLService({
+export async function createUrl({
   urlTitle,
   redirectedUrl,
   _id,

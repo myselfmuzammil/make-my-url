@@ -1,27 +1,27 @@
-import {Request, Response} from "express";
-
-import {asyncHandler} from "../utils/index.js";
-import {createURLService, findUrlByIdAndIncrement} from "../services/index.js";
-import type {UrlBody, UrlParams} from "../schema/index.js";
+import {createUrl, findUrlByIdAndIncrement} from "../services/index.js";
+import {ApiRequest, ApiResponse, asyncHandler} from "../utils/index.js";
 import type {JwtDecodedUser} from "../types/index.js";
+import type {UrlBody, UrlParams} from "../schema/index.js";
 
-export const createUrl = asyncHandler(async function (
-  req: Request<{}, {}, UrlBody> & JwtDecodedUser,
-  res: Response
+export const createUrlHandler = asyncHandler(async function (
+  req: ApiRequest<{body: UrlBody}, JwtDecodedUser>
 ) {
-  const URL = await createURLService({
+  const data = await createUrl({
     ...req.body,
-    ...req.user,
+    ...req.locals.user,
   });
 
-  return res.status(201).json(URL);
+  return new ApiResponse(data, {
+    message: "Url created successfully",
+    statusCode: 201,
+  });
 });
 
 export const redirectUser = asyncHandler(async function (
-  req: Request<UrlParams>,
-  res: Response
+  req: ApiRequest<{params: UrlParams}>
 ) {
-  const URL = await findUrlByIdAndIncrement(req.params._id);
+  const id = req.params._id;
+  const url = await findUrlByIdAndIncrement(id);
 
-  return res.status(303).redirect(URL.redirectedUrl);
+  return (res) => res.redirect(url.redirectedUrl);
 });
