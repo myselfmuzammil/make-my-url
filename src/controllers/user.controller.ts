@@ -39,8 +39,8 @@ export const loginUserHandler = asyncHandler(async function (
 export const logoutUserHandler = asyncHandler(async function (
   req: ApiRequest<{}, JwtDecodedUser>
 ) {
-  const id = req.locals.user._id;
-  await logoutUser(id);
+  const {user} = req.locals;
+  await logoutUser(user._id);
 
   return new ApiResponse(null, {
     message: "user loged out successfully",
@@ -50,9 +50,9 @@ export const logoutUserHandler = asyncHandler(async function (
 export const resetPasswordHandler = asyncHandler(async function (
   req: ApiRequest<{body: OldAndNewPasswordsBody}, JwtDecodedUser>
 ) {
-  const {_id} = req.locals.user;
+  const clientUser = req.locals.user;
 
-  const user = await findUser(_id, {password: true});
+  const user = await findUser(clientUser._id, {password: true});
   await user.resetPassword(req.body);
 
   return new ApiResponse(null, {
@@ -63,8 +63,8 @@ export const resetPasswordHandler = asyncHandler(async function (
 export const deleteUserHandler = asyncHandler(async function (
   req: ApiRequest<{}, JwtDecodedUser>
 ) {
-  const id = req.locals.user._id;
-  await deleteUser(id);
+  const {user} = req.locals;
+  await deleteUser(user._id);
 
   return new ApiResponse(null, {
     message: "User permanently deleted",

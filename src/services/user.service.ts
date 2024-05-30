@@ -2,9 +2,9 @@ import jwt from "jsonwebtoken";
 import _ from "lodash";
 
 import {UserModel} from "../models/index.js";
+import {env} from "../env.js";
 import {ApiError} from "../utils/index.js";
 import type {LoginSchema, SignupSchema} from "../schema/index.js";
-import {env} from "../env.js";
 import type {JwrtDecodedUser, User} from "../types/user.js";
 
 export async function loginUser(cred: LoginSchema) {
@@ -23,7 +23,7 @@ export async function loginUser(cred: LoginSchema) {
   const refreshToken = user.generateRefreshToken();
 
   user.refreshToken = refreshToken;
-  await user.save();
+  await user.save({validateBeforeSave: true});
 
   return {accessToken, refreshToken};
 }
@@ -78,10 +78,9 @@ export async function logoutUser(id: JwrtDecodedUser["_id"]) {
 export async function regenerateAccessAndRefreshTokens(token: string) {
   try {
     const {_id} = <JwrtDecodedUser>jwt.verify(token, env.REFRESH_TOKEN_SECRET);
+    const user = await findUser(_id, {refreshToken: true});
 
-    const user = await UserModel.findById(_id).select("+refreshToken");
-
-    if (token !== user?.refreshToken) {
+    if (token !== user.refreshToken) {
       throw new Error();
     }
 
@@ -89,8 +88,7 @@ export async function regenerateAccessAndRefreshTokens(token: string) {
     const refreshToken = user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
-
-    await user.save();
+    await user.save({validateBeforeSave: true});
 
     return {accessToken, refreshToken};
   } catch (e) {

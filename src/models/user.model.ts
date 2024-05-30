@@ -85,7 +85,7 @@ userSchema.methods.resetPassword = async function ({oldPassword, newPassword}) {
 
   user.password = newPassword;
 
-  return user.save();
+  return user.save({validateBeforeSave: true});
 };
 
 userSchema.methods.generateAccessToken = function () {

@@ -3,11 +3,9 @@ import {ApiError} from "../utils/index.js";
 import type {JwtDecodedUser} from "../types/index.js";
 import type {UrlBody, UrlParams} from "../schema/index.js";
 
-export async function createUrl({
-  urlTitle,
-  redirectedUrl,
-  _id,
-}: UrlBody & JwtDecodedUser["user"]) {
+export async function createUrl(data: UrlBody & JwtDecodedUser["user"]) {
+  const {urlTitle, redirectedUrl, _id} = data;
+
   const URL = await URLModel.create({
     urlTitle,
     redirectedUrl,
@@ -24,14 +22,19 @@ export async function createUrl({
   };
 }
 
+export async function findUrlsByUserId(userId: string) {
+  return URLModel.find({createdBy: userId});
+}
+
 export async function findUrlByIdAndIncrement(_id: UrlParams["_id"]) {
   const URL = await URLModel.findByIdAndUpdate(_id, {$inc: {visits: 1}});
 
-  if (!URL)
+  if (!URL) {
     throw new ApiError({
       message: "URL not found",
       statusCode: 404,
     });
+  }
 
   return URL;
 }

@@ -1,6 +1,10 @@
 import express, {Express, Router} from "express";
 
-import {createUrlHandler, redirectUser} from "../controllers/index.js";
+import {
+  createUrlHandler,
+  findUrlHandler,
+  redirectUser,
+} from "../controllers/index.js";
 import {authenticateUser, validateSchema} from "../middlewares/index.js";
 import {urlBodySchema, urlParamSchema} from "../schema/index.js";
 
@@ -23,6 +27,8 @@ router.get(
   }),
   redirectUser
 );
+
+router.get("/", authenticateUser, findUrlHandler);
 
 urlRoute.use("/url", router);
 
