@@ -1,4 +1,4 @@
-import express, {Router, Express} from "express";
+import {Router} from "express";
 
 import {
   loginSchema,
@@ -9,6 +9,7 @@ import {
 import {
   createUserHandler,
   deleteUserHandler,
+  findUserHandler,
   loginUserHandler,
   logoutUserHandler,
   refreshUserToken,
@@ -16,18 +17,21 @@ import {
 } from "../controllers/index.js";
 import {validateSchema, authenticateUser} from "../middlewares/index.js";
 
-const router: Router = express.Router();
-const userRoute: Express = express();
+const rootRoute = Router();
+const userRoute = Router();
 
-router.post(
-  "/register",
-  validateSchema({
-    body: signupSchema,
-  }),
-  createUserHandler
-);
+userRoute
+  .route("/")
+  .post(
+    validateSchema({
+      body: signupSchema,
+    }),
+    createUserHandler
+  )
+  .get(authenticateUser, findUserHandler)
+  .delete(authenticateUser, deleteUserHandler);
 
-router.post(
+userRoute.post(
   "/login",
   validateSchema({
     body: loginSchema,
@@ -35,7 +39,7 @@ router.post(
   loginUserHandler
 );
 
-router.post(
+userRoute.post(
   "/refreshToken",
   validateSchema({
     body: refreshTokenSchema,
@@ -43,7 +47,7 @@ router.post(
   refreshUserToken
 );
 
-router.post(
+userRoute.post(
   "/resetPassword",
   authenticateUser,
   validateSchema({
@@ -52,9 +56,8 @@ router.post(
   resetPasswordHandler
 );
 
-router.delete("/logout", authenticateUser, logoutUserHandler);
-router.delete("/delete", authenticateUser, deleteUserHandler);
+userRoute.delete("/logout", authenticateUser, logoutUserHandler);
 
-userRoute.use("/user", router);
+rootRoute.use("/users", userRoute);
 
-export default userRoute;
+export default rootRoute;

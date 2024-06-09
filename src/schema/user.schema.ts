@@ -1,5 +1,15 @@
 import z from "zod";
 
+const passwordType = z
+  .string({
+    required_error: "Password is required",
+    invalid_type_error: "Password must be a string",
+  })
+  .regex(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+    "Minimum eight characters, at least one uppercase letter, one lowercase letter, one number and one special character"
+  );
+
 const userSchema = z.object({
   email: z
     .string({
@@ -17,12 +27,7 @@ const userSchema = z.object({
     })
     .max(30, {message: "Name must be less than 30 or equal"}),
 
-  password: z
-    .string({
-      required_error: "Password is required",
-      invalid_type_error: "Password must be a string",
-    })
-    .min(4, {message: "Password must be greater than 4 or equal"}),
+  password: passwordType,
 });
 
 export const loginSchema = userSchema.omit({name: true});
@@ -43,10 +48,15 @@ export const refreshTokenSchema = z.object({
   refreshToken: z.string({required_error: "Unauthorized request"}),
 });
 
-export const oldAndNewPasswords = z.object({
-  oldPassword: z.string(),
-  newPassword: z.string(),
-});
+export const oldAndNewPasswords = z
+  .object({
+    oldPassword: z.string(),
+    newPassword: passwordType,
+  })
+  .refine(
+    ({oldPassword, newPassword}) => newPassword !== oldPassword,
+    "New password should be different from the old password"
+  );
 
 export type SignupSchema = z.infer<typeof userSchema>;
 export type LoginSchema = z.infer<typeof loginSchema>;

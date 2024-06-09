@@ -35,7 +35,7 @@ export async function createUser(user: SignupSchema) {
 }
 
 export async function findUser(
-  id: string,
+  id: User["_id"],
   select: {[T in keyof User]?: boolean} = {}
 ) {
   const user = await UserModel.findById(id).select(
@@ -46,9 +46,9 @@ export async function findUser(
 
   if (!user) {
     throw new ApiError({
-      name: "Invalid user id",
+      name: "User not found",
       message: "user does not exist",
-      statusCode: 400,
+      statusCode: 404,
     });
   }
 

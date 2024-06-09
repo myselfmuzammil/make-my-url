@@ -16,7 +16,7 @@ export const urlBodySchema = z.object({
 });
 
 export const urlParamSchema = z.object({
-  _id: z
+  id: z
     .string({
       required_error: "Id is required",
       invalid_type_error: "Id must be a string",

@@ -71,6 +71,15 @@ export const deleteUserHandler = asyncHandler(async function (
   });
 });
 
+export const findUserHandler = asyncHandler(async function (
+  req: ApiRequest<{}, JwtDecodedUser>
+) {
+  const {user} = req.locals;
+  const userInfo = await findUser(user._id);
+
+  return new ApiResponse(userInfo);
+});
+
 export const refreshUserToken = asyncHandler(async function (
   req: ApiRequest<{body: RefreshTokenSchema}>
 ) {

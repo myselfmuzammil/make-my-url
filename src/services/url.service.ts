@@ -1,6 +1,6 @@
 import {URLModel} from "../models/index.js";
 import {ApiError} from "../utils/index.js";
-import type {JwtDecodedUser} from "../types/index.js";
+import type {JwtDecodedUser, Url, User} from "../types/index.js";
 import type {UrlBody, UrlParams} from "../schema/index.js";
 
 export async function createUrl(data: UrlBody & JwtDecodedUser["user"]) {
@@ -22,11 +22,15 @@ export async function createUrl(data: UrlBody & JwtDecodedUser["user"]) {
   };
 }
 
-export async function findUrlsByUserId(userId: string) {
+export async function findUrlsByUserId(userId: User["_id"]) {
   return URLModel.find({createdBy: userId});
 }
 
-export async function findUrlByIdAndIncrement(_id: UrlParams["_id"]) {
+export async function deleteUrlById(id: string) {
+  return URLModel.findByIdAndDelete(id);
+}
+
+export async function findUrlByIdAndIncrement(_id: UrlParams["id"]) {
   const URL = await URLModel.findByIdAndUpdate(_id, {$inc: {visits: 1}});
 
   if (!URL) {

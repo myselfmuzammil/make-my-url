@@ -1,35 +1,45 @@
-import express, {Express, Router} from "express";
+import {Router} from "express";
 
 import {
   createUrlHandler,
+  findManyUrlHandler,
+  deleteUrlHandler,
   findUrlHandler,
-  redirectUser,
 } from "../controllers/index.js";
 import {authenticateUser, validateSchema} from "../middlewares/index.js";
 import {urlBodySchema, urlParamSchema} from "../schema/index.js";
 
-const router: Router = express.Router();
-const urlRoute: Express = express();
+const rootRoute = Router();
+const urlRoute = Router();
+const protectedRoute = Router();
 
-router.post(
-  "/create",
-  authenticateUser,
-  validateSchema({
-    body: urlBodySchema,
-  }),
-  createUrlHandler
-);
+protectedRoute
+  .route("/")
+  .post(
+    validateSchema({
+      body: urlBodySchema,
+    }),
+    createUrlHandler
+  )
+  .get(findManyUrlHandler);
 
-router.get(
-  "/redirect/:_id",
-  validateSchema({
-    params: urlParamSchema,
-  }),
-  redirectUser
-);
+protectedRoute
+  .route("/:id")
+  .get(
+    validateSchema({
+      params: urlParamSchema,
+    }),
+    findUrlHandler
+  )
+  .delete(
+    validateSchema({
+      params: urlParamSchema,
+    }),
+    deleteUrlHandler
+  );
 
-router.get("/", authenticateUser, findUrlHandler);
+urlRoute.use(authenticateUser, protectedRoute);
 
-urlRoute.use("/url", router);
+rootRoute.use("/urls", urlRoute);
 
-export default urlRoute;
+export default rootRoute;
